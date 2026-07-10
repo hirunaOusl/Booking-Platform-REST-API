@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Service } from '../../services/entities/service.entity';
 
+
 // Defines the strict structural booking operational states
 export enum BookingStatus {
   PENDING = 'PENDING',
