@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
+import { Booking } from '../../bookings/entities/booking.entity';
 
 @Entity('services')
 export class Service {
@@ -22,5 +23,9 @@ export class Service {
 
   @CreateDateColumn()
   createdAt!: Date;
+
+  // Defines the relation: One service can have multiple customer bookings
+  @OneToMany(() => Booking, (booking) => booking.service)
+  bookings!: Booking[];
 
 }
