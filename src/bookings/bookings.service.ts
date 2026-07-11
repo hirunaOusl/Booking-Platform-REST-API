@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not } from 'typeorm'; // ◄ Imported "Not" here
 import { Booking, BookingStatus } from './entities/booking.entity';
 import { Service } from '../services/entities/service.entity';
 import { CreateBookingDto } from './dto/create-booking.dto';
@@ -11,7 +11,7 @@ export class BookingsService {
   constructor(
     @InjectRepository(Booking) private readonly bookingRepo: Repository<Booking>,
     @InjectRepository(Service) private readonly serviceRepo: Repository<Service>,
-  ) {}
+  ) { }
 
   async create(dto: CreateBookingDto): Promise<Booking> {
     // Rule 1: A booking must belong to an existing active service
@@ -26,44 +26,42 @@ export class BookingsService {
       throw new BadRequestException('Booking date cannot be set in the past.');
     }
 
-    // Bonus Rule: Prevent duplicate bookings for the exact same service, date, and time
+    // ✅ FIXED: Blocks slots if there is any active booking (PENDING, CONFIRMED, COMPLETED)
     const duplicate = await this.bookingRepo.findOne({
       where: {
         service: { id: dto.serviceId },
         bookingDate: dto.bookingDate,
         bookingTime: dto.bookingTime,
-        status: BookingStatus.CONFIRMED,
+        status: Not(BookingStatus.CANCELLED), // ◄ Blocks everything except cancelled reservations
       },
     });
+
     if (duplicate) {
-      throw new ConflictException('This time slot is already confirmed for this service.');
+      throw new ConflictException('This time slot is already booked for this service.');
     }
 
     const booking = this.bookingRepo.create({ ...dto, service });
     return this.bookingRepo.save(booking);
   }
 
-  // UPDATED: Added Pagination, Status Filtering, and Search Functionality
-  async findAll(query: { 
-    page?: number; 
-    limit?: number; 
-    search?: string; 
-    status?: BookingStatus 
+  // Keep all other methods (findAll, findOne, updateStatus, cancel) exactly the same...
+  async findAll(query: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: BookingStatus
   }) {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    // Use QueryBuilder to efficiently build filters and fetch relations
     const queryBuilder = this.bookingRepo.createQueryBuilder('booking')
       .leftJoinAndSelect('booking.service', 'service');
 
-    // 1. Filter by Enum Status
     if (query.status) {
       queryBuilder.andWhere('booking.status = :status', { status: query.status });
     }
 
-    // 2. Case-insensitive Search by customerName or customerEmail
     if (query.search) {
       queryBuilder.andWhere(
         '(booking.customerName ILIKE :search OR booking.customerEmail ILIKE :search)',
@@ -71,7 +69,6 @@ export class BookingsService {
       );
     }
 
-    // 3. Execute query with Pagination offsets
     const [data, total] = await queryBuilder
       .orderBy('booking.createdAt', 'DESC')
       .skip(skip)
@@ -101,7 +98,6 @@ export class BookingsService {
   async updateStatus(id: string, dto: UpdateBookingStatusDto): Promise<Booking> {
     const booking = await this.findOne(id);
 
-    // Rule 3: Canceled bookings cannot be marked as completed
     if (booking.status === BookingStatus.CANCELLED && dto.status === BookingStatus.COMPLETED) {
       throw new BadRequestException('A cancelled booking cannot be directly marked as COMPLETED.');
     }

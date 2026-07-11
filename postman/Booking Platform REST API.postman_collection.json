@@ -1,0 +1,774 @@
+{
+  "info": {
+    "_postman_id": "d5e4d6be-c7cd-4b59-8419-f8caec54d6a9",
+    "name": "Booking Platform REST API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "54333143",
+    "_collection_link": "https://go.postman.co/collection/54333143-d5e4d6be-c7cd-4b59-8419-f8caec54d6a9?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let jsonData;",
+                  "const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "if (contentType.includes('application/json')) {",
+                  "    jsonData = pm.response.json();",
+                  "}",
+                  "",
+                  "pm.test('Register returns a success status', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "pm.test('Register response is JSON when a body is returned', function () {",
+                  "    if (pm.response.text()) {",
+                  "        pm.expect(contentType).to.include('application/json');",
+                  "    } else {",
+                  "        pm.expect(pm.response.text()).to.eql('');",
+                  "    }",
+                  "});",
+                  "",
+                  "if (jsonData) {",
+                  "    pm.test('Register response includes a success indicator or created user data', function () {",
+                  "        const hasSignal = !!(",
+                  "            jsonData.id ||",
+                  "            jsonData.user ||",
+                  "            jsonData.email ||",
+                  "            jsonData.message ||",
+                  "            jsonData.accessToken",
+                  "        );",
+                  "        pm.expect(hasSignal, 'expected registration response to include meaningful data').to.be.true;",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"staff1@en2h.com\",\r\n  \"password\": \"SecurePassword123!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/auth/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Log In",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test('Log In returns a success status', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "pm.test('Log In returns an access token', function () {",
+                  "    pm.expect(jsonData).to.be.an('object');",
+                  "    pm.expect(jsonData.accessToken, 'accessToken is missing from login response').to.be.a('string').and.not.empty;",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set('jwt_token', jsonData.accessToken);",
+                  "",
+                  "pm.test('jwt_token collection variable was stored', function () {",
+                  "    pm.expect(pm.collectionVariables.get('jwt_token')).to.eql(jsonData.accessToken);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"staff1@en2h.com\",\r\n  \"password\": \"SecurePassword123!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Service",
+      "item": [
+        {
+          "name": "Create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test('Service Create returns a success status', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "pm.test('Service Create returns the created service payload', function () {",
+                  "    pm.expect(jsonData).to.be.an('object');",
+                  "    pm.expect(jsonData.id, 'service id is missing').to.exist;",
+                  "    pm.expect(jsonData.title, 'service title is missing').to.exist;",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set('active_service_id', String(jsonData.id));",
+                  "",
+                  "pm.test('active_service_id collection variable was stored', function () {",
+                  "    pm.expect(pm.collectionVariables.get('active_service_id')).to.eql(String(jsonData.id));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"Haircut & Styling\",\r\n  \"description\": \"Premium scissor cut followed by washing and hot towel treatment.\",\r\n  \"duration\": 45,\r\n  \"price\": 50.00\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/services",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "services"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "View",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "const items = Array.isArray(jsonData) ? jsonData : (Array.isArray(jsonData.data) ? jsonData.data : null);",
+                  "",
+                  "pm.test('Service View returns status 200', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test('Service View returns a list of services', function () {",
+                  "    pm.expect(items, 'expected an array response or a data array').to.be.an('array');",
+                  "});",
+                  "",
+                  "if (items && items.length > 0) {",
+                  "    pm.test('Each returned service includes core fields', function () {",
+                  "        pm.expect(items[0]).to.be.an('object');",
+                  "        pm.expect(items[0]).to.have.property('id');",
+                  "        pm.expect(items[0]).to.have.property('title');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/services",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "services"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Booking",
+      "item": [
+        {
+          "name": "bookings create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test('Booking create returns a success status', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "pm.test('Booking create returns the created booking payload', function () {",
+                  "    pm.expect(jsonData).to.be.an('object');",
+                  "    pm.expect(jsonData.id, 'booking id is missing').to.exist;",
+                  "    pm.expect(jsonData.serviceId || jsonData.service, 'service reference is missing').to.exist;",
+                  "});",
+                  "",
+                  "pm.collectionVariables.set('active_booking_id', String(jsonData.id));",
+                  "",
+                  "pm.test('active_booking_id collection variable was stored', function () {",
+                  "    pm.expect(pm.collectionVariables.get('active_booking_id')).to.eql(String(jsonData.id));",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceId\": \"{{active_service_id}}\",\n  \"customerName\": \"Bob Jones\",\n  \"customerEmail\": \"bob@example.com\",\n  \"customerPhone\": \"+1555987654\",\n  \"bookingDate\": \"2026-09-14\",\n  \"bookingTime\": \"14:00:00\",\n  \"notes\": \"Trying to steal Alice's slot\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/bookings",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "bookings"
+              ]
+            },
+            "description": "Generated from cURL: curl --request POST 'http://localhost:3000/bookings' --header 'Authorization: Bearer {{jwt_token}}' --header 'Content-Type: application/json' --data-raw '{\n  \"serviceId\": \"{{active_service_id}}\",\n  \"customerName\": \"Bob Jones\",\n  \"customerEmail\": \"bob@example.com\",\n  \"customerPhone\": \"+1555987654\",\n  \"bookingDate\": \"2026-09-14\",\n  \"bookingTime\": \"14:00:00\",\n  \"notes\": \"Trying to steal Alice\\'s slot\"\n}'"
+          },
+          "response": []
+        },
+        {
+          "name": "view",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "const items = Array.isArray(jsonData) ? jsonData : (Array.isArray(jsonData.data) ? jsonData.data : null);",
+                  "",
+                  "pm.test('Booking view returns status 200', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test('Booking view returns a list of bookings', function () {",
+                  "    pm.expect(items, 'expected an array response or a data array').to.be.an('array');",
+                  "});",
+                  "",
+                  "if (items && items.length > 0) {",
+                  "    pm.test('Each returned booking includes core fields', function () {",
+                  "        pm.expect(items[0]).to.have.property('id');",
+                  "        pm.expect(items[0]).to.have.property('customerName');",
+                  "        pm.expect(items[0]).to.have.property('status');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/bookings?page=1&limit=10&search=Jane",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "bookings"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "Jane"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Validation Checks",
+      "item": [
+        {
+          "name": "Double-Booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let jsonData;",
+                  "const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "if (contentType.includes('application/json')) {",
+                  "    jsonData = pm.response.json();",
+                  "}",
+                  "",
+                  "pm.test('Double-Booking is rejected by business validation', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 409, 422]);",
+                  "});",
+                  "",
+                  "pm.test('Double-Booking does not return a success status', function () {",
+                  "    pm.expect(pm.response.code).to.not.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "if (jsonData) {",
+                  "    pm.test('Double-Booking failure response includes an error message', function () {",
+                  "        const message = jsonData.message || jsonData.error || jsonData.details || jsonData.statusMessage;",
+                  "        pm.expect(message, 'expected an error message in the validation failure response').to.exist;",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"serviceId\": \"{{active_service_id}}\",\r\n  \"customerName\": \"Alice Smith\",\r\n  \"customerEmail\": \"alice@example.com\",\r\n  \"customerPhone\": \"+1555123456\",\r\n  \"bookingDate\": \"2026-09-14\",\r\n  \"bookingTime\": \"14:00:00\",\r\n  \"notes\": \"First client\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/bookings",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "bookings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "bookings cancel",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cancel a Booking returns a success status', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});",
+                  "",
+                  "if (pm.response.code !== 204) {",
+                  "    const jsonData = pm.response.json();",
+                  "",
+                  "    pm.test('Cancel a Booking response reflects canceled state when a body is returned', function () {",
+                  "        if (jsonData.status !== undefined) {",
+                  "            pm.expect(String(jsonData.status).toUpperCase()).to.eql('CANCELED');",
+                  "        } else {",
+                  "            pm.expect(jsonData).to.be.an('object');",
+                  "        }",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/bookings/{{active_booking_id}}/cancel",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "bookings",
+                "{{active_booking_id}}",
+                "cancel"
+              ]
+            },
+            "description": "Generated from cURL: curl --request DELETE 'http://localhost:3000/bookings/{{active_booking_id}}/cancel' --header 'Authorization: Bearer {{jwt_token}}'"
+          },
+          "response": []
+        },
+        {
+          "name": "bookings status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let jsonData;",
+                  "const contentType = pm.response.headers.get('Content-Type') || '';",
+                  "if (contentType.includes('application/json')) {",
+                  "    jsonData = pm.response.json();",
+                  "}",
+                  "",
+                  "pm.test('Canceled-to-Completed is rejected by business validation', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([400, 409, 422]);",
+                  "});",
+                  "",
+                  "pm.test('Canceled-to-Completed does not return a success status', function () {",
+                  "    pm.expect(pm.response.code).to.not.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "if (jsonData) {",
+                  "    pm.test('Canceled-to-Completed failure response includes an error message', function () {",
+                  "        const message = jsonData.message || jsonData.error || jsonData.details || jsonData.statusMessage;",
+                  "        pm.expect(message, 'expected an error message in the invalid transition response').to.exist;",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"COMPLETED\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/bookings/{{active_booking_id}}/status",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "bookings",
+                "{{active_booking_id}}",
+                "status"
+              ]
+            },
+            "description": "Generated from cURL: curl --request PATCH 'http://localhost:3000/bookings/{{active_booking_id}}/status' --header 'Authorization: Bearer {{jwt_token}}' --header 'Content-Type: application/json' --data-raw '{\"status\":\"COMPLETED\"}'"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "item": [
+        {
+          "name": "New Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "const items = Array.isArray(jsonData) ? jsonData : (Array.isArray(jsonData.data) ? jsonData.data : null);",
+                  "",
+                  "pm.test('Search bookings returns status 200', function () {",
+                  "    pm.expect(pm.response.code).to.eql(200);",
+                  "});",
+                  "",
+                  "pm.test('Search bookings returns a list of matching bookings', function () {",
+                  "    pm.expect(items, 'expected an array response or a data array').to.be.an('array');",
+                  "});",
+                  "",
+                  "if (jsonData.meta) {",
+                  "    pm.test('Search bookings response includes pagination metadata', function () {",
+                  "        pm.expect(jsonData.meta).to.have.property('currentPage');",
+                  "        pm.expect(jsonData.meta).to.have.property('itemsPerPage');",
+                  "    });",
+                  "}",
+                  "",
+                  "if (items && items.length > 0) {",
+                  "    pm.test('Search results include core booking fields', function () {",
+                  "        pm.expect(items[0]).to.have.property('id');",
+                  "        pm.expect(items[0]).to.have.property('customerName');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"data\": [\r\n        {\r\n            \"id\": \"f82e117c-ad25-4cfd-97b8-6f0a69bea7a7\",\r\n            \"customerName\": \"Alice Smith\",\r\n            \"customerEmail\": \"alice@example.com\",\r\n            \"customerPhone\": \"+1555123456\",\r\n            \"bookingDate\": \"2026-09-15\",\r\n            \"bookingTime\": \"14:00:00\",\r\n            \"status\": \"PENDING\",\r\n            \"notes\": \"First client\",\r\n            \"createdAt\": \"2026-07-11T09:21:38.441Z\",\r\n            \"service\": {\r\n                \"id\": \"8ca5ff8c-1538-4daf-a54e-31d103aabb43\",\r\n                \"title\": \"Haircut & Styling\",\r\n                \"price\": \"50.00\"\r\n            }\r\n        }\r\n    ],\r\n    \"meta\": {\r\n        \"totalItems\": 1,\r\n        \"itemCount\": 1,\r\n        \"itemsPerPage\": 5,\r\n        \"totalPages\": 1,\r\n        \"currentPage\": 1\r\n    }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/bookings?page=1&limit=5&search=Alice",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "bookings"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Targets the first page of data offset"
+                },
+                {
+                  "key": "limit",
+                  "value": "5",
+                  "description": "Limits the maximum array chunk size to 5 records"
+                },
+                {
+                  "key": "search",
+                  "value": "Alice",
+                  "description": "Searches for \"Alice\" inside names or emails"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "jwt_token",
+      "value": ""
+    },
+    {
+      "key": "active_booking_id",
+      "value": ""
+    },
+    {
+      "key": "active_service_id",
+      "value": ""
+    }
+  ]
+}
