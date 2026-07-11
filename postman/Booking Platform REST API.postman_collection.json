@@ -16,7 +16,6 @@
             {
               "listen": "test",
               "script": {
-                "type": "text/javascript",
                 "exec": [
                   "let jsonData;",
                   "const contentType = pm.response.headers.get('Content-Type') || '';",
@@ -48,7 +47,10 @@
                   "        pm.expect(hasSignal, 'expected registration response to include meaningful data').to.be.true;",
                   "    });",
                   "}"
-                ]
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -65,12 +67,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/auth/register",
-              "protocol": "http",
+              "raw": "{{baseUrl}}/auth/register",
               "host": [
-                "localhost"
+                "{{baseUrl}}"
               ],
-              "port": "3000",
               "path": [
                 "auth",
                 "register"
@@ -85,7 +85,6 @@
             {
               "listen": "test",
               "script": {
-                "type": "text/javascript",
                 "exec": [
                   "const jsonData = pm.response.json();",
                   "",
@@ -98,12 +97,15 @@
                   "    pm.expect(jsonData.accessToken, 'accessToken is missing from login response').to.be.a('string').and.not.empty;",
                   "});",
                   "",
-                  "pm.collectionVariables.set('jwt_token', jsonData.accessToken);",
+                  "pm.environment.set('jwt_token', jsonData.accessToken);",
                   "",
-                  "pm.test('jwt_token collection variable was stored', function () {",
-                  "    pm.expect(pm.collectionVariables.get('jwt_token')).to.eql(jsonData.accessToken);",
+                  "pm.test('jwt_token environment variable was stored', function () {",
+                  "    pm.expect(pm.environment.get('jwt_token')).to.eql(jsonData.accessToken);",
                   "});"
-                ]
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -120,12 +122,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/auth/login",
-              "protocol": "http",
+              "raw": "{{baseUrl}}/auth/login",
               "host": [
-                "localhost"
+                "{{baseUrl}}"
               ],
-              "port": "3000",
               "path": [
                 "auth",
                 "login"
@@ -145,7 +145,6 @@
             {
               "listen": "test",
               "script": {
-                "type": "text/javascript",
                 "exec": [
                   "const jsonData = pm.response.json();",
                   "",
@@ -159,12 +158,15 @@
                   "    pm.expect(jsonData.title, 'service title is missing').to.exist;",
                   "});",
                   "",
-                  "pm.collectionVariables.set('active_service_id', String(jsonData.id));",
+                  "pm.environment.set('active_service_id', String(jsonData.id));",
                   "",
-                  "pm.test('active_service_id collection variable was stored', function () {",
-                  "    pm.expect(pm.collectionVariables.get('active_service_id')).to.eql(String(jsonData.id));",
+                  "pm.test('active_service_id environment variable was stored', function () {",
+                  "    pm.expect(pm.environment.get('active_service_id')).to.eql(String(jsonData.id));",
                   "});"
-                ]
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -191,12 +193,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/services",
-              "protocol": "http",
+              "raw": "{{baseUrl}}/services",
               "host": [
-                "localhost"
+                "{{baseUrl}}"
               ],
-              "port": "3000",
               "path": [
                 "services"
               ]
@@ -210,7 +210,6 @@
             {
               "listen": "test",
               "script": {
-                "type": "text/javascript",
                 "exec": [
                   "const jsonData = pm.response.json();",
                   "const items = Array.isArray(jsonData) ? jsonData : (Array.isArray(jsonData.data) ? jsonData.data : null);",
@@ -230,7 +229,10 @@
                   "        pm.expect(items[0]).to.have.property('title');",
                   "    });",
                   "}"
-                ]
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -260,12 +262,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/services",
-              "protocol": "http",
+              "raw": "{{baseUrl}}/services",
               "host": [
-                "localhost"
+                "{{baseUrl}}"
               ],
-              "port": "3000",
               "path": [
                 "services"
               ]
@@ -297,10 +297,10 @@
                   "    pm.expect(jsonData.serviceId || jsonData.service, 'service reference is missing').to.exist;",
                   "});",
                   "",
-                  "pm.collectionVariables.set('active_booking_id', String(jsonData.id));",
+                  "pm.environment.set('active_booking_id', String(jsonData.id));",
                   "",
-                  "pm.test('active_booking_id collection variable was stored', function () {",
-                  "    pm.expect(pm.collectionVariables.get('active_booking_id')).to.eql(String(jsonData.id));",
+                  "pm.test('active_booking_id environment variable was stored', function () {",
+                  "    pm.expect(pm.environment.get('active_booking_id')).to.eql(String(jsonData.id));",
                   "});"
                 ],
                 "type": "text/javascript",
@@ -331,12 +331,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/bookings",
-              "protocol": "http",
+              "raw": "{{baseUrl}}/bookings",
               "host": [
-                "localhost"
+                "{{baseUrl}}"
               ],
-              "port": "3000",
               "path": [
                 "bookings"
               ]
@@ -351,7 +349,6 @@
             {
               "listen": "test",
               "script": {
-                "type": "text/javascript",
                 "exec": [
                   "const jsonData = pm.response.json();",
                   "const items = Array.isArray(jsonData) ? jsonData : (Array.isArray(jsonData.data) ? jsonData.data : null);",
@@ -371,7 +368,10 @@
                   "        pm.expect(items[0]).to.have.property('status');",
                   "    });",
                   "}"
-                ]
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -401,12 +401,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/bookings?page=1&limit=10&search=Jane",
-              "protocol": "http",
+              "raw": "{{baseUrl}}/bookings?page=1&limit=10&search=Jane",
               "host": [
-                "localhost"
+                "{{baseUrl}}"
               ],
-              "port": "3000",
               "path": [
                 "bookings"
               ],
@@ -439,7 +437,6 @@
             {
               "listen": "test",
               "script": {
-                "type": "text/javascript",
                 "exec": [
                   "let jsonData;",
                   "const contentType = pm.response.headers.get('Content-Type') || '';",
@@ -461,7 +458,10 @@
                   "        pm.expect(message, 'expected an error message in the validation failure response').to.exist;",
                   "    });",
                   "}"
-                ]
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -478,12 +478,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/bookings",
-              "protocol": "http",
+              "raw": "{{baseUrl}}/bookings",
               "host": [
-                "localhost"
+                "{{baseUrl}}"
               ],
-              "port": "3000",
               "path": [
                 "bookings"
               ]
@@ -508,7 +506,7 @@
                   "",
                   "    pm.test('Cancel a Booking response reflects canceled state when a body is returned', function () {",
                   "        if (jsonData.status !== undefined) {",
-                  "            pm.expect(String(jsonData.status).toUpperCase()).to.eql('CANCELED');",
+                  "            pm.expect(['CANCELED', 'CANCELLED']).to.include(String(jsonData.status).toUpperCase());",
                   "        } else {",
                   "            pm.expect(jsonData).to.be.an('object');",
                   "        }",
@@ -537,12 +535,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:3000/bookings/{{active_booking_id}}/cancel",
-              "protocol": "http",
+              "raw": "{{baseUrl}}/bookings/{{active_booking_id}}/cancel",
               "host": [
-                "localhost"
+                "{{baseUrl}}"
               ],
-              "port": "3000",
               "path": [
                 "bookings",
                 "{{active_booking_id}}",
@@ -559,7 +555,6 @@
             {
               "listen": "test",
               "script": {
-                "type": "text/javascript",
                 "exec": [
                   "let jsonData;",
                   "const contentType = pm.response.headers.get('Content-Type') || '';",
@@ -581,7 +576,10 @@
                   "        pm.expect(message, 'expected an error message in the invalid transition response').to.exist;",
                   "    });",
                   "}"
-                ]
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -617,12 +615,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/bookings/{{active_booking_id}}/status",
-              "protocol": "http",
+              "raw": "{{baseUrl}}/bookings/{{active_booking_id}}/status",
               "host": [
-                "localhost"
+                "{{baseUrl}}"
               ],
-              "port": "3000",
               "path": [
                 "bookings",
                 "{{active_booking_id}}",
@@ -644,7 +640,6 @@
             {
               "listen": "test",
               "script": {
-                "type": "text/javascript",
                 "exec": [
                   "const jsonData = pm.response.json();",
                   "const items = Array.isArray(jsonData) ? jsonData : (Array.isArray(jsonData.data) ? jsonData.data : null);",
@@ -670,7 +665,10 @@
                   "        pm.expect(items[0]).to.have.property('customerName');",
                   "    });",
                   "}"
-                ]
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
               }
             }
           ],
@@ -700,12 +698,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/bookings?page=1&limit=5&search=Alice",
-              "protocol": "http",
+              "raw": "{{baseUrl}}/bookings?page=1&limit=5&search=Alice",
               "host": [
-                "localhost"
+                "{{baseUrl}}"
               ],
-              "port": "3000",
               "path": [
                 "bookings"
               ],
@@ -731,6 +727,14 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "New Request",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
     }
   ],
   "event": [
