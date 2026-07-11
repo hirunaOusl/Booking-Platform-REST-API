@@ -1,98 +1,176 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# EN2H Booking Platform REST API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A progressive, enterprise-grade NestJS REST API engine designed for managing customer service catalogs and appointment bookings. It features secure JWT authentication, automatic input schema validations, database entity relations with PostgreSQL, and interactive API documentation.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Table of Contents
+1. [Project Overview](#project-overview)
+2. [Installation Steps](#installation-steps)
+3. [Environment Variables](#environment-variables)
+4. [Database Setup](#database-setup)
+5. [Running the Application](#running-the-application)
+6. [Running Migrations](#running-migrations)
+7. [API Documentation](#api-documentation)
+8. [Assumptions Made](#assumptions-made)
+9. [Future Improvements](#future-improvements)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+---
 
-## Project setup
+## Project Overview
 
-```bash
-$ npm install
+The **EN2H Booking Platform REST API** acts as the backend booking ledger system. It separates concerns between administrative/staff operations and client-facing features:
+- **Administrative Users**: Can register, log in, and perform full CRUD operations on services. They also manage booking statuses and cancellations.
+- **Anonymous Customers**: Can browse the available services catalog and request bookings without requiring an account.
+
+### Features
+- **JWT Security**: Secures administrative endpoints.
+- **Global Validation & Exception Handling**: Rejects malformed JSON bodies and converts exception messages into standard response schemas.
+- **Relational Integrity**: Integrates PostgreSQL using TypeORM with cascade behavior.
+- **Advanced Bookings Queries**: Offers pagination, case-insensitive keyword searches, and status filtering out-of-the-box.
+
+---
+
+## Installation Steps
+
+1. **Clone or Extract the Project Directory**
+   Ensure you are in the root directory containing `package.json`.
+
+2. **Install Dependencies**
+   Run the following command to download and install all necessary npm modules:
+   ```bash
+   npm install
+   ```
+
+---
+
+## Environment Variables
+
+The application relies on environment configurations. In the root directory, create a `.env` file matching the schema defined in `.env.example`:
+
+```env
+# Application Port Config
+PORT=3000
+
+# PostgreSQL Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=your_secure_password
+DB_NAME=en2h_booking_db
+
+# Security & Tokens Configuration
+JWT_SECRET=your_super_secret_jwt_token_key_abc_123_xyz
+JWT_EXPIRATION=3600s
 ```
 
-## Compile and run the project
+---
+
+## Database Setup
+
+1. **Install PostgreSQL**
+   Ensure PostgreSQL is installed locally or running in a container.
+
+2. **Create the Database**
+   Log into your PostgreSQL instance and create the target database schema:
+   ```sql
+   CREATE DATABASE en2h_booking_db;
+   ```
+
+3. **Development Auto-Sync**
+   By default, the application is configured to run in development speed mode (`synchronize: true` in `app.module.ts`). On application startup, TypeORM will automatically inspect your models and create the `users`, `services`, and `bookings` tables for you.
+
+---
+
+## Running the Application
+
+You can execute the NestJS server using the following commands:
 
 ```bash
-# development
-$ npm run start
+# Run in development watch mode (Hot-reload enabled)
+npm run start:dev
 
-# watch mode
-$ npm run start:dev
+# Build the production bundle
+npm run build
 
-# production mode
-$ npm run start:prod
+# Run the compiled production bundle
+npm run start:prod
 ```
 
-## Run tests
+---
 
-```bash
-# unit tests
-$ npm run test
+## Running Migrations
 
-# e2e tests
-$ npm run test:e2e
+Database schema updates are managed using TypeORM migrations. In development and production, schema synchronization is disabled (`synchronize: false` in [app.module.ts](file:///c:/Users/RCS/intern/en2h-booking-platform/src/app.module.ts)) to prevent data loss.
 
-# test coverage
-$ npm run test:cov
-```
+### Automatic Runs on Startup
+Since `migrationsRun: true` is configured in `AppModule`, any pending migrations inside `src/db/migrations/` will run automatically when you boot the server via `npm run start` or `npm run start:dev`.
 
-## Deployment
+### Manual Migration Scripts
+You can also run or generate migrations manually using the following npm scripts:
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+- **Run Pending Migrations**:
+  ```bash
+  npm run migration:run
+  ```
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+- **Generate a New Migration (based on entity schema changes)**:
+  ```bash
+  npm run migration:generate -- src/db/migrations/YourMigrationName
+  ```
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+- **Revert the Last Applied Migration**:
+  ```bash
+  npm run typeorm migration:revert
+  ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+- **Configuration File**: All migrations use the database parameters loaded from the `.env` file via [typeorm.config.ts](file:///c:/Users/RCS/intern/en2h-booking-platform/typeorm.config.ts).
 
-## Resources
+---
 
-Check out a few resources that may come in handy when working with NestJS:
+## API Documentation
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Interactive API documentation is generated automatically using **Swagger (OpenAPI)**. 
 
-## Support
+- **Local Swagger UI Link**: [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
+  *(Accessible once the local server is running)*
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Endpoint Highlights
 
-## Stay in touch
+#### 🔐 Authentication (`/auth`)
+* `POST /auth/register` - Registers a new user.
+* `POST /auth/login` - Authenticates user credentials and returns a JWT Bearer token.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+#### 🛠️ Service Catalog Management (`/services`)
+* `GET /services` *(Public)* - Retrieves all active and inactive services.
+* `GET /services/:id` *(Public)* - Retrieves details for a specific service.
+* `POST /services` *(Authenticated)* - Creates a new catalog item.
+* `PATCH /services/:id` *(Authenticated)* - Updates service pricing, description, duration, or active status.
+* `DELETE /services/:id` *(Authenticated)* - Deletes a service.
 
-## License
+#### 📅 Booking Management (`/bookings`)
+* `POST /bookings` *(Public)* - Places an appointment booking request for an active service.
+* `GET /bookings` *(Authenticated)* - Retrieves historical bookings (supports `page`, `limit`, `search`, and `status` query filters).
+* `GET /bookings/:id` *(Authenticated)* - Retrieves a specific booking.
+* `PATCH /bookings/:id/status` *(Authenticated)* - Updates a booking state.
+* `DELETE /bookings/:id/cancel` *(Authenticated)* - Cancels a booking.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+---
+
+## Assumptions Made
+
+1. **Service Visibility**: Retrieve operations for services (`GET /services` and `GET /services/:id`) are public. This ensures anonymous customers can discover services in order to book them.
+2. **Booking Date Boundaries**: The date comparison checks that the requested appointment date is on or after the current UTC date string (`YYYY-MM-DD`). 
+3. **Service Availability**: A booking can only be placed on a service whose `isActive` flag is explicitly set to `true`.
+4. **Duplicate Prevention**: The check prevents duplicate bookings only if the existing matching booking is in a `CONFIRMED` state. Customers can create identical requests if the matching slot is still `PENDING`, `CANCELLED`, or `COMPLETED`.
+5. **State Transition Constraint**: Only the direct transition from `CANCELLED` status to `COMPLETED` status is blocked, in accordance with the requirement *"Canceled bookings cannot be marked as completed."*
+
+---
+
+## Future Improvements
+
+1. **Docker Containerization**: Add a `Dockerfile` and `docker-compose.yml` to bundle the Node application and Postgres database into an isolated orchestratable stack.
+2. **Refresh Token Rotation**: Implement standard token rotation via HttpOnly cookies to keep administrative users safely logged in.
+3. **Comprehensive Unit Testing**: Replace boilerplate spec files with mock-injected test suites verifying service-level database exceptions, validation dtos, and boundary rules.
+4. **Advanced Date/Time Slot Logic**: Integrate time zone handling (e.g., luxon or moment-timezone) and calculate service durations to prevent overlapping bookings.
+5. **Strict Booking State Machine**: Restrict status modifications so once a booking is marked as `COMPLETED` or `CANCELLED`, its state becomes immutable.
