@@ -7,23 +7,27 @@ import { BookingsModule } from './bookings/bookings.module';
 
 @Module({
   imports: [
-    // Automatically load .env file from the root directory
+    // Automatically load .env file parameters from the root directory
     ConfigModule.forRoot({ isGlobal: true }),
-    
+
     // Configure PostgreSQL Connection
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST || 'localhost',
       port: parseInt(process.env.DB_PORT || '5432', 10),
       username: process.env.DB_USERNAME || 'postgres',
-      password: process.env.DB_PASSWORD || 'password',
+      password: process.env.DB_PASSWORD || 'secret_password',
       database: process.env.DB_NAME || 'en2h_booking_db',
-      autoLoadEntities: true, // Automatically registers schemas with 'entity.ts' extension
-      synchronize: true,     // Active for development speed; disable & use migrations for production!
+      autoLoadEntities: true,
+      synchronize: false,
+
+      // Registers the tracking files context into the runtime framework instance
+      migrations: [__dirname + '/db/migrations/*{.ts,.js}'],
+      migrationsRun: true, // Automatically runs pending migrations on app startup!
     }),
     AuthModule,
     ServicesModule,
     BookingsModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }
