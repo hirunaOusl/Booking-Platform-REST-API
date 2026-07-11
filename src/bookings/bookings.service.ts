@@ -43,8 +43,51 @@ export class BookingsService {
     return this.bookingRepo.save(booking);
   }
 
-  async findAll(): Promise<Booking[]> {
-    return this.bookingRepo.find();
+  // UPDATED: Added Pagination, Status Filtering, and Search Functionality
+  async findAll(query: { 
+    page?: number; 
+    limit?: number; 
+    search?: string; 
+    status?: BookingStatus 
+  }) {
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    // Use QueryBuilder to efficiently build filters and fetch relations
+    const queryBuilder = this.bookingRepo.createQueryBuilder('booking')
+      .leftJoinAndSelect('booking.service', 'service');
+
+    // 1. Filter by Enum Status
+    if (query.status) {
+      queryBuilder.andWhere('booking.status = :status', { status: query.status });
+    }
+
+    // 2. Case-insensitive Search by customerName or customerEmail
+    if (query.search) {
+      queryBuilder.andWhere(
+        '(booking.customerName ILIKE :search OR booking.customerEmail ILIKE :search)',
+        { search: `%${query.search}%` }
+      );
+    }
+
+    // 3. Execute query with Pagination offsets
+    const [data, total] = await queryBuilder
+      .orderBy('booking.createdAt', 'DESC')
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return {
+      data,
+      meta: {
+        totalItems: total,
+        itemCount: data.length,
+        itemsPerPage: limit,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+      },
+    };
   }
 
   async findOne(id: string): Promise<Booking> {
